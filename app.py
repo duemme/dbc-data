@@ -3,59 +3,59 @@ import pandas as pd
 import plotly.express as px
 import os
 
-# --- 1. CONFIGURAZIONE PAGINA ---
+# --- 1. PAGE CONFIGURATION ---
 st.set_page_config(layout="wide", page_title="Italy Bluefin Tuna Landings")
 
-# Percorso del file basato sulla tua struttura GitHub
+# Data path based on the repository structure
 FILE_PATH = "data/pescaTonnoRosso/pescaTonnoRosso.csv"
 
-# --- 2. CARICAMENTO DATI ---
+# --- 2. DATA LOADING ---
 @st.cache_data
 def load_data(path):
     if not os.path.exists(path):
-        st.error(f"File non trovato: {path}")
+        st.error(f"Data file not found at: {path}")
         st.stop()
         
     df = pd.read_csv(path)
     df['data_cattura'] = pd.to_datetime(df['data_cattura'])
-    # Forza l'anno come stringa per evitare i decimali sull'asse X (es. 2024.5)
+    # Force year to string to ensure categorical X-axis (no decimals like 2024.5)
     df['year'] = df['data_cattura'].dt.year.astype(str) 
     return df
 
-# --- 3. LOGICA E CALCOLI ---
+# --- 3. DATA PROCESSING ---
 try:
     df = load_data(FILE_PATH)
 
-    # Calcolo dei totali annuali per i pesi
+    # Calculate Annual National Totals
     annual_totals = df.groupby('year')['peso_kg'].sum().reset_index(name='total_kg')
     
-    # Aggregazione per regione e anno (Somma, Conteggio e Media)
+    # Aggregate by Year and Region (Sum, Count, and Mean)
     reg_annual = df.groupby(['year', 'regione']).agg(
         weight=('peso_kg', 'sum'),
         count=('peso_kg', 'count'),
         avg_weight=('peso_kg', 'mean')
     ).reset_index()
     
-    # Unione per il calcolo delle percentuali di quota
+    # Merge for Quota Share calculations
     stats = reg_annual.merge(annual_totals, on='year')
     stats['share_pct'] = (stats['weight'] / stats['total_kg']) * 100
 
-    # Ordine regioni basato sul peso totale storico (per un ranking costante)
+    # Sort regions by total historical weight for consistent ranking
     region_rank = df.groupby('regione')['peso_kg'].sum().sort_values(ascending=False).index.tolist()
     years_sorted = sorted(df['year'].unique().tolist())
 
-    # --- 4. INTERFACCIA DASHBOARD ---
+    # --- 4. DASHBOARD UI ---
     st.title("Italy Bluefin Tuna Recreational Landings Dashboard")
     st.markdown("---")
 
-    # Riga dei KPI (Indicatori Chiave)
+    # KPI Summary Indicators
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Landings (kg)", f"{df['peso_kg'].sum():,.0f}")
     col2.metric("Total Specimens", f"{len(df):,}")
     col3.metric("Avg Weight per Specimen", f"{df['peso_kg'].mean():.1f} kg")
     col4.metric("Active Regions", df['regione'].nunique())
 
-    # --- GRAFICO 1: Volume Regionale / Numero Sbarchi (Toggle) ---
+    # --- CHART 1: Regional Volume / Landings Count Toggle ---
     st.subheader("Regional Performance Analysis")
     metric_choice = st.radio(
         "Select metric for the chart below:",
@@ -75,9 +75,9 @@ try:
     )
     st.plotly_chart(fig1, use_container_width=True)
 
-    # --- GRAFICO 2: Peso Medio per Regione ---
+    # --- CHART 2: Average Weight per Region ---
     st.subheader("Average Landing Weight (kg) per Region")
-    st.markdown("Questo grafico mostra la variazione della taglia media dei tonni sbarcati per regione.")
+    st.markdown("This chart analyzes the average size of specimens landed in each region relative to the national average.")
     
     fig_avg = px.bar(
         stats, x="regione", y="avg_weight", color="year", barmode="group",
@@ -85,7 +85,7 @@ try:
         labels={"avg_weight": "Average Weight (kg)", "regione": "Region", "year": "Year"}
     )
     
-    # Calcolo media nazionale per la linea di riferimento
+    # Add National Average Reference Line
     national_avg = df['peso_kg'].mean()
     fig_avg.add_hline(
         y=national_avg, 
@@ -96,16 +96,18 @@ try:
     
     st.plotly_chart(fig_avg, use_container_width=True)
 
-    # --- GRAFICO 3: Percentuale di Quota (Share) ---
+    # --- CHART 3: Regional Quota Share (%) ---
     st.subheader("Regional Share of Annual Landings (%)")
+    st.markdown("Distribution of the total annual recreational catch across regions.")
+    
     fig2 = px.bar(
         stats, x="year", y="share_pct", color="regione", barmode="stack",
         category_orders={"regione": region_rank},
-        labels={"share_pct": "Share of Annual Total (%)", "year": "Year"}
+        labels={"share_pct": "Share of Annual Total (%)", "year": "Year", "regione": "Region"}
     )
     fig2.update_xaxes(type='category')
     fig2.update_layout(yaxis_range=[0, 100])
     st.plotly_chart(fig2, use_container_width=True)
 
 except Exception as e:
-    st.error(f"Si è verificato un errore imprevisto: {e}")
+    st.error(f"An unexpected error occurred: {e}")
