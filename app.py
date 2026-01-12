@@ -126,7 +126,7 @@ try:
     annual_totals_sorted['yoy_growth'] = annual_totals_sorted['total_kg'].pct_change() * 100
     
     # 4. DASHBOARD UI
-    st.markdown('<p class="main-header">Italy Bluefin Tuna Recreational Landings Dashboard</p>', unsafe_allow_html=True)
+    st.title("Italy Bluefin Tuna Recreational Landings Dashboard")
     st.markdown('<p class="sub-header">Comprehensive Analysis of Recreational Fishing Data</p>', unsafe_allow_html=True)
     st.markdown("---")
     
@@ -228,7 +228,6 @@ try:
         
         # Pie chart
         st.markdown("### Regional Distribution")
-        st.info("ℹ️ **Note**: Single-clicking legend items hides/shows regions. Double-clicking isolates one region (visual will show full circle but percentage remains accurate).")
         
         col1, col2 = st.columns(2)
         
@@ -236,57 +235,46 @@ try:
             st.subheader("Regional Share (by Weight)")
             # Add percentage column for proper display
             reg_overall_display = reg_overall.copy()
-            reg_overall_display['percentage'] = reg_overall_display['share_pct'].round(1).astype(str) + '%'
+            reg_overall_display['percentage_text'] = reg_overall_display['share_pct'].round(1).astype(str) + '%'
             
-            fig_pie = px.pie(
-                reg_overall_display, 
-                values='peso_kg', 
-                names='regione', 
+            # Create pie chart with go.Pie for better control
+            fig_pie = go.Figure(data=[go.Pie(
+                labels=reg_overall_display['regione'],
+                values=reg_overall_display['peso_kg'],
                 hole=0.4,
-                color_discrete_sequence=px.colors.qualitative.Set3,
-                labels={"peso_kg": "Total Weight (kg)", "regione": "Region"}
-            )
-            # Use customdata to show actual percentages and configure trace settings
-            fig_pie.update_traces(
-                textposition='inside', 
-                texttemplate='%{label}<br>%{customdata}',
-                customdata=reg_overall_display['percentage'],
-                hovertemplate='<b>%{label}</b><br>Weight: %{value:,.0f} kg<br>Percentage: %{customdata}<extra></extra>'
-            )
-            # Prevent single slice from showing as full circle
+                texttemplate='%{label}<br>%{text}',
+                text=reg_overall_display['percentage_text'],
+                textposition='inside',
+                hovertemplate='<b>%{label}</b><br>Weight: %{value:,.0f} kg<br>Percentage: %{text}<extra></extra>',
+                marker=dict(colors=px.colors.qualitative.Set3)
+            )])
+            
             fig_pie.update_layout(
                 height=500,
-                showlegend=True,
-                uniformtext_minsize=10,
-                uniformtext_mode='hide'
+                showlegend=True
             )
             st.plotly_chart(fig_pie, use_container_width=True)
         
         with col2:
             st.subheader("Regional Share (by Count)")
             reg_count = df_filtered.groupby('regione').size().reset_index(name='count')
-            reg_count['total_count'] = reg_count['count'].sum()
-            reg_count['percentage'] = ((reg_count['count'] / reg_count['total_count']) * 100).round(1).astype(str) + '%'
+            total_count_val = reg_count['count'].sum()
+            reg_count['percentage_text'] = ((reg_count['count'] / total_count_val) * 100).round(1).astype(str) + '%'
             
-            fig_pie_count = px.pie(
-                reg_count, 
-                values='count', 
-                names='regione', 
+            fig_pie_count = go.Figure(data=[go.Pie(
+                labels=reg_count['regione'],
+                values=reg_count['count'],
                 hole=0.4,
-                color_discrete_sequence=px.colors.qualitative.Pastel,
-                labels={"count": "Number of Landings", "regione": "Region"}
-            )
-            fig_pie_count.update_traces(
-                textposition='inside', 
-                texttemplate='%{label}<br>%{customdata}',
-                customdata=reg_count['percentage'],
-                hovertemplate='<b>%{label}</b><br>Count: %{value:,}<br>Percentage: %{customdata}<extra></extra>'
-            )
+                texttemplate='%{label}<br>%{text}',
+                text=reg_count['percentage_text'],
+                textposition='inside',
+                hovertemplate='<b>%{label}</b><br>Count: %{value:,}<br>Percentage: %{text}<extra></extra>',
+                marker=dict(colors=px.colors.qualitative.Pastel)
+            )])
+            
             fig_pie_count.update_layout(
                 height=500,
-                showlegend=True,
-                uniformtext_minsize=10,
-                uniformtext_mode='hide'
+                showlegend=True
             )
             st.plotly_chart(fig_pie_count, use_container_width=True)
     
