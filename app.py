@@ -6,11 +6,12 @@ from plotly.subplots import make_subplots
 import os
 from datetime import datetime
 
-# Plotly config to disable scroll zoom (better for mobile)
+# Plotly config to disable all zoom interactions (better for mobile)
 PLOTLY_CONFIG = {
     'scrollZoom': False,
     'displayModeBar': True,
-    'displaylogo': False
+    'displaylogo': False,
+    'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']
 }
 
 # 1. PAGE CONFIGURATION
@@ -197,7 +198,7 @@ try:
             labels={y_col: y_label, "regione": "Region", "year_str": "Year"},
             title=f"{metric_choice} by Region and Year"
         )
-        fig_perf.update_layout(height=500)
+        fig_perf.update_layout(height=500, dragmode=False)
         st.plotly_chart(fig_perf, use_container_width=True, config=PLOTLY_CONFIG)
         
         # Average Weight Chart
@@ -212,7 +213,7 @@ try:
             y=nat_avg, line_dash="dash", line_color="red",
             annotation_text=f"Overall Avg: {nat_avg:.1f}kg"
         )
-        fig_avg.update_layout(height=500)
+        fig_avg.update_layout(height=500, dragmode=False)
         st.plotly_chart(fig_avg, use_container_width=True, config=PLOTLY_CONFIG)
         
         # Distribution box plot
@@ -223,7 +224,7 @@ try:
             labels={"peso_kg": "Weight (kg)", "regione": "Region"},
             color="regione"
         )
-        fig_box.update_layout(height=500, showlegend=False)
+        fig_box.update_layout(height=500, showlegend=False, dragmode=False)
         st.plotly_chart(fig_box, use_container_width=True, config=PLOTLY_CONFIG)
         
         # Pie chart
@@ -251,7 +252,8 @@ try:
             
             fig_pie.update_layout(
                 height=500,
-                showlegend=True
+                showlegend=True,
+                dragmode=False
             )
             st.plotly_chart(fig_pie, use_container_width=True, config=PLOTLY_CONFIG)
         
@@ -274,7 +276,8 @@ try:
             
             fig_pie_count.update_layout(
                 height=500,
-                showlegend=True
+                showlegend=True,
+                dragmode=False
             )
             st.plotly_chart(fig_pie_count, use_container_width=True, config=PLOTLY_CONFIG)
         
@@ -288,7 +291,7 @@ try:
             labels={"share_pct": "Share of Yearly Total (%)", "year": "Year", "regione": "Region"}
         )
         fig_share.update_xaxes(type='category')
-        fig_share.update_layout(yaxis_range=[0, 100], height=500)
+        fig_share.update_layout(yaxis_range=[0, 100], height=500, dragmode=False)
         st.plotly_chart(fig_share, use_container_width=True, config=PLOTLY_CONFIG)
     
     # ========== TAB 2: DATA EXPLORER ==========
