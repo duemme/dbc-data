@@ -6,7 +6,7 @@ import os
 # --- 1. GLOBAL SETTINGS ---
 st.set_page_config(layout="wide", page_title="Italy Bluefin Tuna Landings")
 
-# Path based on your repository structure: data -> pescaTonnoRosso -> file
+# Path based on your repository structure
 FILE_PATH = "data/pescaTonnoRosso/pescaTonnoRosso.csv"
 
 # --- 2. DATA LOADING ---
@@ -18,7 +18,7 @@ def load_data(path):
         
     df = pd.read_csv(path)
     df['data_cattura'] = pd.to_datetime(df['data_cattura'])
-    # Force year to string to ensure categorical axis (no decimals like 2024.5)
+    # Force year to string for categorical axis
     df['year'] = df['data_cattura'].dt.year.astype(str) 
     return df
 
@@ -26,21 +26,23 @@ def load_data(path):
 try:
     df = load_data(FILE_PATH)
 
-    # Pre-calculate Weight and Count for the charts
+    # Pre-calculate Metrics
     annual_totals = df.groupby('year')['peso_kg'].sum().reset_index(name='total_kg')
     
-    # Aggregating by year and region for both sum (weight) and count (landings)
+    # Aggregating by year and region for Sum, Count, and Mean
     reg_annual = df.groupby(['year', 'regione']).agg(
         weight=('peso_kg', 'sum'),
-        count=('peso_kg', 'count')
+        count=('peso_kg', 'count'),
+        avg_weight=('peso_kg', 'mean')
     ).reset_index()
     
-    # Merge for the percentage calculation
+    # Merge for percentage calculation
     stats = reg_annual.merge(annual_totals, on='year')
     stats['share_pct'] = (stats['weight'] / stats['total_kg']) * 100
 
-    # Sort regions by total weight for a consistent ranking (biggest regions on the left)
+    # Sort regions by total historical weight for consistent ranking
     region_rank = df.groupby('regione')['peso_kg'].sum().sort_values(ascending=False).index.tolist()
+    years_sorted = sorted(df['year'].unique().tolist())
 
     # --- 4. DASHBOARD UI ---
     st.title("Italy Bluefin Tuna Recreational Landings Dashboard")
@@ -53,52 +55,35 @@ try:
     col3.metric("Avg Weight per Specimen", f"{df['peso_kg'].mean():.1f} kg")
     col4.metric("Active Regions", df['regione'].nunique())
 
-    # --- CHART 1: Regional Performance (Switchable Metric) ---
+    # --- CHART 1: Regional Volume/Landings (Toggleable) ---
     st.subheader("Regional Performance Analysis")
-    
-    # Toggle between Weight and Count
     metric_choice = st.radio(
-        "Select metric to display:",
+        "Select metric for first chart:",
         ["Total Weight (kg)", "Number of Landings"],
         horizontal=True
     )
     
     if metric_choice == "Total Weight (kg)":
-        selected_y = "weight"
-        y_axis_label = "Weight (kg)"
+        selected_y, y_label = "weight", "Weight (kg)"
     else:
-        selected_y = "count"
-        y_axis_label = "Number of Landings"
+        selected_y, y_label = "count", "Number of Landings"
 
     fig1 = px.bar(
-        stats, 
-        x="regione", 
-        y=selected_y, 
-        color="year", 
-        barmode="group",
-        category_orders={"regione": region_rank, "year": sorted(df['year'].unique().tolist())},
-        labels={selected_y: y_axis_label, "regione": "Region", "year": "Year"}
+        stats, x="regione", y=selected_y, color="year", barmode="group",
+        category_orders={"regione": region_rank, "year": years_sorted},
+        labels={selected_y: y_label, "regione": "Region", "year": "Year"}
     )
     st.plotly_chart(fig1, use_container_width=True)
 
-    # --- CHART 2: Percentage Share of Annual Landings ---
-    st.subheader("Regional Share of Annual Landings (%)")
-    st.info("Each vertical bar represents 100% of the recreational landings for that specific year.")
+    # --- CHART 2: Average Weight per Region ---
+    st.subheader("Average Landing Weight (kg) per Region")
+    st.markdown("This chart reveals regional variations in the typical size of specimens landed.")
     
-    fig2 = px.bar(
-        stats, 
-        x="year", 
-        y="share_pct", 
-        color="regione", 
-        barmode="stack",
-        category_orders={"regione": region_rank},
-        labels={"share_pct": "Share of Annual Landings (%)", "year": "Year", "regione": "Region"}
+    fig_avg = px.bar(
+        stats, x="regione", y="avg_weight", color="year", barmode="group",
+        category_orders={"regione": region_rank, "year": years_sorted},
+        labels={"avg_weight": "Average Weight (kg)", "regione": "Region", "year": "Year"}
     )
-    
-    # Ensure axis is categorical and scale is 0-100%
-    fig2.update_xaxes(type='category')
-    fig2.update_layout(yaxis_range=[0, 100])
-    st.plotly_chart(fig2, use_container_width=True)
-
-except Exception as e:
-    st.error(f"An unexpected error occurred: {e}")
+    # Add a horizontal line for the national average for reference
+    fig_avg.add_hline(y=df['peso_kg'].mean(), line_dash="dash", line_color="red", 
+                      annotation_text=f"National Avg: {df['peso_kg'].
