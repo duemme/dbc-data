@@ -13,16 +13,17 @@ st.set_page_config(layout="wide", page_title="Italy Bluefin Tuna Landings - Enha
 st.markdown("""
     <style>
     .main-header {
-        font-size: 3rem;
+        font-size: 3.5rem;
         font-weight: bold;
-        color: #1f77b4;
+        color: #0066cc;
         text-align: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.2rem;
+        margin-top: 1rem;
     }
     .sub-header {
         text-align: center;
         color: #666;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         margin-bottom: 2rem;
     }
     .metric-container {
@@ -230,24 +231,46 @@ try:
         
         with col1:
             st.subheader("Regional Share (by Weight)")
+            # Add percentage column for proper display
+            reg_overall_display = reg_overall.copy()
+            reg_overall_display['percentage'] = reg_overall_display['share_pct'].round(1).astype(str) + '%'
+            
             fig_pie = px.pie(
-                reg_overall, values='peso_kg', names='regione', hole=0.4,
+                reg_overall_display, 
+                values='peso_kg', 
+                names='regione', 
+                hole=0.4,
                 color_discrete_sequence=px.colors.qualitative.Set3,
                 labels={"peso_kg": "Total Weight (kg)", "regione": "Region"}
             )
-            fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+            # Use customdata to show actual percentages
+            fig_pie.update_traces(
+                textposition='inside', 
+                texttemplate='%{label}<br>%{customdata}',
+                customdata=reg_overall_display['percentage']
+            )
             fig_pie.update_layout(height=500)
             st.plotly_chart(fig_pie, use_container_width=True)
         
         with col2:
             st.subheader("Regional Share (by Count)")
             reg_count = df_filtered.groupby('regione').size().reset_index(name='count')
+            reg_count['total_count'] = reg_count['count'].sum()
+            reg_count['percentage'] = ((reg_count['count'] / reg_count['total_count']) * 100).round(1).astype(str) + '%'
+            
             fig_pie_count = px.pie(
-                reg_count, values='count', names='regione', hole=0.4,
+                reg_count, 
+                values='count', 
+                names='regione', 
+                hole=0.4,
                 color_discrete_sequence=px.colors.qualitative.Pastel,
                 labels={"count": "Number of Landings", "regione": "Region"}
             )
-            fig_pie_count.update_traces(textposition='inside', textinfo='percent+label')
+            fig_pie_count.update_traces(
+                textposition='inside', 
+                texttemplate='%{label}<br>%{customdata}',
+                customdata=reg_count['percentage']
+            )
             fig_pie_count.update_layout(height=500)
             st.plotly_chart(fig_pie_count, use_container_width=True)
     
