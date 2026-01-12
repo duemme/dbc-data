@@ -6,7 +6,7 @@ import os
 # --- 1. GLOBAL SETTINGS ---
 st.set_page_config(layout="wide", page_title="Italy Bluefin Tuna Landings")
 
-# Path based on your repository structure
+# Path based on your repository structure: data -> pescaTonnoRosso -> file
 FILE_PATH = "data/pescaTonnoRosso/pescaTonnoRosso.csv"
 
 # --- 2. DATA LOADING ---
@@ -18,7 +18,7 @@ def load_data(path):
         
     df = pd.read_csv(path)
     df['data_cattura'] = pd.to_datetime(df['data_cattura'])
-    # Force year to string to ensure categorical axis (no decimals)
+    # Force year to string to ensure categorical axis (no decimals like 2024.5)
     df['year'] = df['data_cattura'].dt.year.astype(str) 
     return df
 
@@ -26,18 +26,20 @@ def load_data(path):
 try:
     df = load_data(FILE_PATH)
 
-    # Pre-calculate Weight and Count
+    # Pre-calculate Weight and Count for the charts
     annual_totals = df.groupby('year')['peso_kg'].sum().reset_index(name='total_kg')
     
+    # Aggregating by year and region for both sum (weight) and count (landings)
     reg_annual = df.groupby(['year', 'regione']).agg(
         weight=('peso_kg', 'sum'),
         count=('peso_kg', 'count')
     ).reset_index()
     
+    # Merge for the percentage calculation
     stats = reg_annual.merge(annual_totals, on='year')
     stats['share_pct'] = (stats['weight'] / stats['total_kg']) * 100
 
-    # Sort regions by total weight for consistent ranking
+    # Sort regions by total weight for a consistent ranking (biggest regions on the left)
     region_rank = df.groupby('regione')['peso_kg'].sum().sort_values(ascending=False).index.tolist()
 
     # --- 4. DASHBOARD UI ---
@@ -54,6 +56,7 @@ try:
     # --- CHART 1: Regional Performance (Switchable Metric) ---
     st.subheader("Regional Performance Analysis")
     
+    # Toggle between Weight and Count
     metric_choice = st.radio(
         "Select metric to display:",
         ["Total Weight (kg)", "Number of Landings"],
@@ -85,4 +88,17 @@ try:
     fig2 = px.bar(
         stats, 
         x="year", 
-        y="
+        y="share_pct", 
+        color="regione", 
+        barmode="stack",
+        category_orders={"regione": region_rank},
+        labels={"share_pct": "Share of Annual Landings (%)", "year": "Year", "regione": "Region"}
+    )
+    
+    # Ensure axis is categorical and scale is 0-100%
+    fig2.update_xaxes(type='category')
+    fig2.update_layout(yaxis_range=[0, 100])
+    st.plotly_chart(fig2, use_container_width=True)
+
+except Exception as e:
+    st.error(f"An unexpected error occurred: {e}")
