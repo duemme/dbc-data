@@ -155,9 +155,8 @@ try:
     st.markdown("---")
     
     # === TABS FOR BETTER ORGANIZATION ===
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2 = st.tabs([
         "📊 Overview", 
-        "🗺️ Geographic Analysis",
         "📋 Data Explorer"
     ])
     
@@ -271,70 +270,6 @@ try:
                 showlegend=True
             )
             st.plotly_chart(fig_pie_count, use_container_width=True)
-    
-    # ========== TAB 2: GEOGRAPHIC ANALYSIS ==========
-    with tab2:
-        st.subheader("Geographic Distribution Analysis")
-        
-        # FAO Zone analysis
-        st.markdown("### FAO Fishing Zones")
-        
-        fao_stats = df_filtered.groupby('fao_common').agg(
-            total_weight=('peso_kg', 'sum'),
-            total_count=('peso_kg', 'count'),
-            avg_weight=('peso_kg', 'mean')
-        ).reset_index().sort_values('total_weight', ascending=False)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            fig_fao = px.bar(
-                fao_stats, x='fao_common', y='total_weight',
-                labels={'fao_common': 'Fishing Zone', 'total_weight': 'Total Weight (kg)'},
-                title="Total Catch by Fishing Zone",
-                color='total_weight',
-                color_continuous_scale='Blues'
-            )
-            fig_fao.update_layout(height=400)
-            fig_fao.update_xaxes(tickangle=30)
-            st.plotly_chart(fig_fao, use_container_width=True)
-        
-        with col2:
-            fig_fao_count = px.bar(
-                fao_stats, x='fao_common', y='total_count',
-                labels={'fao_common': 'Fishing Zone', 'total_count': 'Number of Landings'},
-                title="Number of Landings by Fishing Zone",
-                color='total_count',
-                color_continuous_scale='Greens'
-            )
-            fig_fao_count.update_layout(height=400)
-            fig_fao_count.update_xaxes(tickangle=30)
-            st.plotly_chart(fig_fao_count, use_container_width=True)
-        
-        # Region-FAO cross-analysis
-        st.markdown("### Region × Fishing Zone Analysis")
-        
-        region_fao = df_filtered.groupby(['regione', 'fao_common'])['peso_kg'].sum().reset_index()
-        
-        # Create pivot table for heatmap
-        pivot_data = region_fao.pivot(index='regione', columns='fao_common', values='peso_kg')
-        # Sort rows by region rank
-        pivot_data = pivot_data.reindex([r for r in region_rank if r in pivot_data.index])
-        
-        fig_heatmap = px.imshow(
-            pivot_data,
-            labels=dict(x="Fishing Zone", y="Region", color="Weight (kg)"),
-            aspect="auto",
-            color_continuous_scale='YlOrRd',
-            title="Catch Distribution: Region vs Fishing Zone"
-        )
-        # Set 0 or NaN values to white
-        fig_heatmap.update_traces(
-            zmid=0,
-            zmin=0
-        )
-        fig_heatmap.update_layout(height=500)
-        st.plotly_chart(fig_heatmap, use_container_width=True)
         
         # Yearly contribution share
         st.markdown("### Yearly Contribution to National Total")
@@ -349,8 +284,8 @@ try:
         fig_share.update_layout(yaxis_range=[0, 100], height=500)
         st.plotly_chart(fig_share, use_container_width=True)
     
-    # ========== TAB 3: DATA EXPLORER ==========
-    with tab3:
+    # ========== TAB 2: DATA EXPLORER ==========
+    with tab2:
         st.subheader("Data Explorer & Download")
         
         # Summary statistics
