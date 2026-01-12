@@ -6,6 +6,13 @@ from plotly.subplots import make_subplots
 import os
 from datetime import datetime
 
+# Plotly config to disable scroll zoom (better for mobile)
+PLOTLY_CONFIG = {
+    'scrollZoom': False,
+    'displayModeBar': True,
+    'displaylogo': False
+}
+
 # 1. PAGE CONFIGURATION
 st.set_page_config(layout="wide", page_title="Italy Bluefin Tuna Landings - Enhanced", page_icon="🐟")
 
@@ -191,7 +198,7 @@ try:
             title=f"{metric_choice} by Region and Year"
         )
         fig_perf.update_layout(height=500)
-        st.plotly_chart(fig_perf, use_container_width=True)
+        st.plotly_chart(fig_perf, use_container_width=True, config=PLOTLY_CONFIG)
         
         # Average Weight Chart
         st.subheader("Average Landing Weight (kg) per Region")
@@ -206,7 +213,7 @@ try:
             annotation_text=f"Overall Avg: {nat_avg:.1f}kg"
         )
         fig_avg.update_layout(height=500)
-        st.plotly_chart(fig_avg, use_container_width=True)
+        st.plotly_chart(fig_avg, use_container_width=True, config=PLOTLY_CONFIG)
         
         # Distribution box plot
         st.subheader("Weight Distribution by Region")
@@ -217,7 +224,7 @@ try:
             color="regione"
         )
         fig_box.update_layout(height=500, showlegend=False)
-        st.plotly_chart(fig_box, use_container_width=True)
+        st.plotly_chart(fig_box, use_container_width=True, config=PLOTLY_CONFIG)
         
         # Pie chart
         st.markdown("### Regional Distribution")
@@ -246,7 +253,7 @@ try:
                 height=500,
                 showlegend=True
             )
-            st.plotly_chart(fig_pie, use_container_width=True)
+            st.plotly_chart(fig_pie, use_container_width=True, config=PLOTLY_CONFIG)
         
         with col2:
             st.subheader("Regional Share (by Count)")
@@ -269,7 +276,7 @@ try:
                 height=500,
                 showlegend=True
             )
-            st.plotly_chart(fig_pie_count, use_container_width=True)
+            st.plotly_chart(fig_pie_count, use_container_width=True, config=PLOTLY_CONFIG)
         
         # Yearly contribution share
         st.markdown("### Yearly Contribution to National Total")
@@ -282,7 +289,7 @@ try:
         )
         fig_share.update_xaxes(type='category')
         fig_share.update_layout(yaxis_range=[0, 100], height=500)
-        st.plotly_chart(fig_share, use_container_width=True)
+        st.plotly_chart(fig_share, use_container_width=True, config=PLOTLY_CONFIG)
     
     # ========== TAB 2: DATA EXPLORER ==========
     with tab2:
