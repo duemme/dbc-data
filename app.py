@@ -126,12 +126,12 @@ try:
     annual_totals_sorted['yoy_growth'] = annual_totals_sorted['total_kg'].pct_change() * 100
     
     # 4. DASHBOARD UI
-    st.title("Italy Bluefin Tuna Recreational Landings Dashboard")
+    st.markdown("<h1 style='text-align: center;'>Italy Bluefin Tuna Recreational Landings Dashboard</h1>", unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Comprehensive Analysis of Recreational Fishing Data</p>', unsafe_allow_html=True)
     st.markdown("---")
     
     # KPIs
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric("Total Weight", f"{total_all_time:,.0f} kg")
@@ -141,12 +141,6 @@ try:
         st.metric("Avg Weight/Specimen", f"{df_filtered['peso_kg'].mean():.1f} kg")
     with col4:
         st.metric("Active Regions", len(region_rank))
-    with col5:
-        if len(annual_totals_sorted) > 1 and not pd.isna(annual_totals_sorted['yoy_growth'].iloc[-1]):
-            latest_growth = annual_totals_sorted['yoy_growth'].iloc[-1]
-            st.metric("Latest YoY Growth", f"{latest_growth:+.1f}%", delta=f"{latest_growth:.1f}%")
-        else:
-            st.metric("Latest YoY Growth", "N/A")
     
     # INTERACTIVE TIPS
     with st.expander("💡 Pro Tips for Chart Interaction"):
