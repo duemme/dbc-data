@@ -227,6 +227,9 @@ try:
         st.plotly_chart(fig_box, use_container_width=True)
         
         # Pie chart
+        st.markdown("### Regional Distribution")
+        st.info("ℹ️ **Note**: Single-clicking legend items hides/shows regions. Double-clicking isolates one region (visual will show full circle but percentage remains accurate).")
+        
         col1, col2 = st.columns(2)
         
         with col1:
@@ -243,13 +246,20 @@ try:
                 color_discrete_sequence=px.colors.qualitative.Set3,
                 labels={"peso_kg": "Total Weight (kg)", "regione": "Region"}
             )
-            # Use customdata to show actual percentages
+            # Use customdata to show actual percentages and configure trace settings
             fig_pie.update_traces(
                 textposition='inside', 
                 texttemplate='%{label}<br>%{customdata}',
-                customdata=reg_overall_display['percentage']
+                customdata=reg_overall_display['percentage'],
+                hovertemplate='<b>%{label}</b><br>Weight: %{value:,.0f} kg<br>Percentage: %{customdata}<extra></extra>'
             )
-            fig_pie.update_layout(height=500)
+            # Prevent single slice from showing as full circle
+            fig_pie.update_layout(
+                height=500,
+                showlegend=True,
+                uniformtext_minsize=10,
+                uniformtext_mode='hide'
+            )
             st.plotly_chart(fig_pie, use_container_width=True)
         
         with col2:
@@ -269,9 +279,15 @@ try:
             fig_pie_count.update_traces(
                 textposition='inside', 
                 texttemplate='%{label}<br>%{customdata}',
-                customdata=reg_count['percentage']
+                customdata=reg_count['percentage'],
+                hovertemplate='<b>%{label}</b><br>Count: %{value:,}<br>Percentage: %{customdata}<extra></extra>'
             )
-            fig_pie_count.update_layout(height=500)
+            fig_pie_count.update_layout(
+                height=500,
+                showlegend=True,
+                uniformtext_minsize=10,
+                uniformtext_mode='hide'
+            )
             st.plotly_chart(fig_pie_count, use_container_width=True)
     
     # ========== TAB 2: GEOGRAPHIC ANALYSIS ==========
