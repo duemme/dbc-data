@@ -26,20 +26,18 @@ def load_data(path):
 try:
     df = load_data(FILE_PATH)
 
-    # Pre-calculate both Weight and Count for the regions
+    # Pre-calculate Weight and Count
     annual_totals = df.groupby('year')['peso_kg'].sum().reset_index(name='total_kg')
     
-    # Aggregating by year and region for both sum (weight) and count (landings)
     reg_annual = df.groupby(['year', 'regione']).agg(
         weight=('peso_kg', 'sum'),
         count=('peso_kg', 'count')
     ).reset_index()
     
-    # Merge for the percentage calculation
     stats = reg_annual.merge(annual_totals, on='year')
     stats['share_pct'] = (stats['weight'] / stats['total_kg']) * 100
 
-    # Sort regions by total weight for a consistent ranking
+    # Sort regions by total weight for consistent ranking
     region_rank = df.groupby('regione')['peso_kg'].sum().sort_values(ascending=False).index.tolist()
 
     # --- 4. DASHBOARD UI ---
@@ -56,14 +54,12 @@ try:
     # --- CHART 1: Regional Performance (Switchable Metric) ---
     st.subheader("Regional Performance Analysis")
     
-    # Add a radio button to toggle between Weight and Count
     metric_choice = st.radio(
         "Select metric to display:",
         ["Total Weight (kg)", "Number of Landings"],
         horizontal=True
     )
     
-    # Map selection to the correct dataframe column and label
     if metric_choice == "Total Weight (kg)":
         selected_y = "weight"
         y_axis_label = "Weight (kg)"
@@ -85,9 +81,8 @@ try:
     # --- CHART 2: Percentage Share of Annual Landings ---
     st.subheader("Regional Share of Annual Landings (%)")
     st.info("Each vertical bar represents 100% of the recreational landings for that specific year.")
+    
     fig2 = px.bar(
         stats, 
         x="year", 
-        y="share_pct", 
-        color="regione", 
-        barm
+        y="
