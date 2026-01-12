@@ -13,7 +13,7 @@ st.set_page_config(layout="wide", page_title="Italy Bluefin Tuna Landings - Enha
 st.markdown("""
     <style>
     .main-header {
-        font-size: 2.5rem;
+        font-size: 3rem;
         font-weight: bold;
         color: #1f77b4;
         text-align: center;
@@ -22,6 +22,7 @@ st.markdown("""
     .sub-header {
         text-align: center;
         color: #666;
+        font-size: 1.2rem;
         margin-bottom: 2rem;
     }
     .metric-container {
@@ -58,7 +59,6 @@ try:
     df = load_data(FILE_PATH)
     
     # Sidebar filters
-    st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2965/2965414.png", width=100)
     st.sidebar.title("🎛️ Filters")
     
     years_available = sorted(df['year'].unique().tolist())
@@ -90,6 +90,14 @@ try:
         st.stop()
     
     # Calculate statistics
+    # FAO zone common names mapping
+    fao_zone_names = {
+        '37.1.3': 'Ligurian Sea & Tyrrhenian Sea',
+        '37.2.1': 'Adriatic Sea',
+        '37.2.2': 'Ionian Sea'
+    }
+    df_filtered['fao_common'] = df_filtered['zona_FAO'].map(fao_zone_names).fillna(df_filtered['zona_FAO'])
+    
     # All-time stats per region
     reg_overall = df_filtered.groupby('regione')['peso_kg'].sum().reset_index()
     total_all_time = reg_overall['peso_kg'].sum()
@@ -117,7 +125,7 @@ try:
     annual_totals_sorted['yoy_growth'] = annual_totals_sorted['total_kg'].pct_change() * 100
     
     # 4. DASHBOARD UI
-    st.markdown('<p class="main-header">🐟 Italy Bluefin Tuna Recreational Landings Dashboard</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">Italy Bluefin Tuna Recreational Landings Dashboard</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Comprehensive Analysis of Recreational Fishing Data</p>', unsafe_allow_html=True)
     st.markdown("---")
     
@@ -152,11 +160,9 @@ try:
     st.markdown("---")
     
     # === TABS FOR BETTER ORGANIZATION ===
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3 = st.tabs([
         "📊 Overview", 
-        "📈 Time Series", 
         "🗺️ Geographic Analysis",
-        "📅 Seasonality",
         "📋 Data Explorer"
     ])
     
@@ -245,113 +251,14 @@ try:
             fig_pie_count.update_layout(height=500)
             st.plotly_chart(fig_pie_count, use_container_width=True)
     
-    # ========== TAB 2: TIME SERIES ==========
+    # ========== TAB 2: GEOGRAPHIC ANALYSIS ==========
     with tab2:
-        st.subheader("Trends Over Time")
-        
-        # Monthly aggregation
-        monthly_data = df_filtered.groupby(['year_month', 'year', 'month']).agg(
-            total_weight=('peso_kg', 'sum'),
-            total_count=('peso_kg', 'count'),
-            avg_weight=('peso_kg', 'mean')
-        ).reset_index().sort_values('year_month')
-        
-        # Time series selector
-        ts_metric = st.selectbox(
-            "Select metric to visualize over time:",
-            ["Total Weight (kg)", "Number of Landings", "Average Weight (kg)"]
-        )
-        
-        if ts_metric == "Total Weight (kg)":
-            y_col_ts = 'total_weight'
-            y_label_ts = 'Total Weight (kg)'
-        elif ts_metric == "Number of Landings":
-            y_col_ts = 'total_count'
-            y_label_ts = 'Number of Landings'
-        else:
-            y_col_ts = 'avg_weight'
-            y_label_ts = 'Average Weight (kg)'
-        
-        fig_ts = px.line(
-            monthly_data, x='year_month', y=y_col_ts,
-            markers=True,
-            labels={'year_month': 'Month', y_col_ts: y_label_ts},
-            title=f"{ts_metric} - Monthly Trend"
-        )
-        fig_ts.update_xaxes(tickangle=45)
-        fig_ts.update_layout(height=500)
-        st.plotly_chart(fig_ts, use_container_width=True)
-        
-        # Regional time series
-        st.subheader("Regional Trends Over Time")
-        
-        top_n = st.slider("Show top N regions by total weight:", 3, len(region_rank), min(5, len(region_rank)))
-        top_regions = region_rank[:top_n]
-        
-        monthly_regional = df_filtered[df_filtered['regione'].isin(top_regions)].groupby(
-            ['year_month', 'regione']
-        )['peso_kg'].sum().reset_index()
-        
-        fig_ts_reg = px.line(
-            monthly_regional, x='year_month', y='peso_kg', color='regione',
-            markers=True,
-            labels={'year_month': 'Month', 'peso_kg': 'Total Weight (kg)', 'regione': 'Region'},
-            title=f"Top {top_n} Regions - Monthly Weight Trends"
-        )
-        fig_ts_reg.update_xaxes(tickangle=45)
-        fig_ts_reg.update_layout(height=500)
-        st.plotly_chart(fig_ts_reg, use_container_width=True)
-        
-        # Year over Year comparison
-        st.subheader("Year-over-Year Comparison")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            fig_yoy = go.Figure()
-            fig_yoy.add_trace(go.Bar(
-                x=annual_totals_sorted['year'],
-                y=annual_totals_sorted['total_kg'],
-                name='Total Weight',
-                marker_color='steelblue'
-            ))
-            fig_yoy.update_layout(
-                title="Total Annual Landings (kg)",
-                xaxis_title="Year",
-                yaxis_title="Weight (kg)",
-                height=400
-            )
-            st.plotly_chart(fig_yoy, use_container_width=True)
-        
-        with col2:
-            if len(annual_totals_sorted) > 1:
-                fig_growth = go.Figure()
-                fig_growth.add_trace(go.Bar(
-                    x=annual_totals_sorted['year'].iloc[1:],
-                    y=annual_totals_sorted['yoy_growth'].iloc[1:],
-                    marker_color=annual_totals_sorted['yoy_growth'].iloc[1:].apply(
-                        lambda x: 'green' if x > 0 else 'red'
-                    )
-                ))
-                fig_growth.update_layout(
-                    title="Year-over-Year Growth Rate (%)",
-                    xaxis_title="Year",
-                    yaxis_title="Growth (%)",
-                    height=400
-                )
-                fig_growth.add_hline(y=0, line_dash="dash", line_color="black")
-                st.plotly_chart(fig_growth, use_container_width=True)
-            else:
-                st.info("Need at least 2 years of data to show growth rates.")
-    
-    # ========== TAB 3: GEOGRAPHIC ANALYSIS ==========
-    with tab3:
         st.subheader("Geographic Distribution Analysis")
         
         # FAO Zone analysis
         st.markdown("### FAO Fishing Zones")
         
-        fao_stats = df_filtered.groupby('zona_FAO').agg(
+        fao_stats = df_filtered.groupby('fao_common').agg(
             total_weight=('peso_kg', 'sum'),
             total_count=('peso_kg', 'count'),
             avg_weight=('peso_kg', 'mean')
@@ -361,35 +268,37 @@ try:
         
         with col1:
             fig_fao = px.bar(
-                fao_stats, x='zona_FAO', y='total_weight',
-                labels={'zona_FAO': 'FAO Zone', 'total_weight': 'Total Weight (kg)'},
-                title="Total Catch by FAO Zone",
+                fao_stats, x='fao_common', y='total_weight',
+                labels={'fao_common': 'Fishing Zone', 'total_weight': 'Total Weight (kg)'},
+                title="Total Catch by Fishing Zone",
                 color='total_weight',
                 color_continuous_scale='Blues'
             )
             fig_fao.update_layout(height=400)
+            fig_fao.update_xaxes(tickangle=30)
             st.plotly_chart(fig_fao, use_container_width=True)
         
         with col2:
             fig_fao_count = px.bar(
-                fao_stats, x='zona_FAO', y='total_count',
-                labels={'zona_FAO': 'FAO Zone', 'total_count': 'Number of Landings'},
-                title="Number of Landings by FAO Zone",
+                fao_stats, x='fao_common', y='total_count',
+                labels={'fao_common': 'Fishing Zone', 'total_count': 'Number of Landings'},
+                title="Number of Landings by Fishing Zone",
                 color='total_count',
                 color_continuous_scale='Greens'
             )
             fig_fao_count.update_layout(height=400)
+            fig_fao_count.update_xaxes(tickangle=30)
             st.plotly_chart(fig_fao_count, use_container_width=True)
         
         # Region-FAO cross-analysis
-        st.markdown("### Region × FAO Zone Analysis")
+        st.markdown("### Region × Fishing Zone Analysis")
         
-        region_fao = df_filtered.groupby(['regione', 'zona_FAO'])['peso_kg'].sum().reset_index()
+        region_fao = df_filtered.groupby(['regione', 'fao_common'])['peso_kg'].sum().reset_index()
         
         fig_heatmap = px.density_heatmap(
-            region_fao, x='zona_FAO', y='regione', z='peso_kg',
-            labels={'peso_kg': 'Total Weight (kg)', 'regione': 'Region', 'zona_FAO': 'FAO Zone'},
-            title="Catch Distribution: Region vs FAO Zone",
+            region_fao, x='fao_common', y='regione', z='peso_kg',
+            labels={'peso_kg': 'Total Weight (kg)', 'regione': 'Region', 'fao_common': 'Fishing Zone'},
+            title="Catch Distribution: Region vs Fishing Zone",
             color_continuous_scale='YlOrRd'
         )
         fig_heatmap.update_layout(height=500)
@@ -408,89 +317,8 @@ try:
         fig_share.update_layout(yaxis_range=[0, 100], height=500)
         st.plotly_chart(fig_share, use_container_width=True)
     
-    # ========== TAB 4: SEASONALITY ==========
-    with tab4:
-        st.subheader("Seasonal Patterns Analysis")
-        
-        # Month analysis
-        month_order = ['January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December']
-        
-        monthly_pattern = df_filtered.groupby('month_name').agg(
-            total_weight=('peso_kg', 'sum'),
-            total_count=('peso_kg', 'count'),
-            avg_weight=('peso_kg', 'mean')
-        ).reset_index()
-        
-        # Ensure proper ordering
-        monthly_pattern['month_name'] = pd.Categorical(
-            monthly_pattern['month_name'], 
-            categories=month_order, 
-            ordered=True
-        )
-        monthly_pattern = monthly_pattern.sort_values('month_name')
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            fig_month = px.bar(
-                monthly_pattern, x='month_name', y='total_weight',
-                labels={'month_name': 'Month', 'total_weight': 'Total Weight (kg)'},
-                title="Total Catch by Month",
-                color='total_weight',
-                color_continuous_scale='Blues'
-            )
-            fig_month.update_xaxes(tickangle=45)
-            fig_month.update_layout(height=400)
-            st.plotly_chart(fig_month, use_container_width=True)
-        
-        with col2:
-            fig_month_count = px.bar(
-                monthly_pattern, x='month_name', y='total_count',
-                labels={'month_name': 'Month', 'total_count': 'Number of Landings'},
-                title="Number of Landings by Month",
-                color='total_count',
-                color_continuous_scale='Greens'
-            )
-            fig_month_count.update_xaxes(tickangle=45)
-            fig_month_count.update_layout(height=400)
-            st.plotly_chart(fig_month_count, use_container_width=True)
-        
-        # Seasonality heatmap
-        st.markdown("### Seasonal Heatmap: Region × Month")
-        
-        # Create month-region heatmap
-        df_filtered['month_num'] = df_filtered['month']
-        month_region = df_filtered.groupby(['month_name', 'regione'])['peso_kg'].sum().reset_index()
-        month_region['month_name'] = pd.Categorical(
-            month_region['month_name'],
-            categories=month_order,
-            ordered=True
-        )
-        month_region = month_region.sort_values('month_name')
-        
-        # Pivot for heatmap
-        heatmap_data = month_region.pivot(index='regione', columns='month_name', values='peso_kg').fillna(0)
-        heatmap_data = heatmap_data.loc[region_rank]  # Order by total weight
-        
-        fig_season_heatmap = px.imshow(
-            heatmap_data,
-            labels=dict(x="Month", y="Region", color="Weight (kg)"),
-            aspect="auto",
-            color_continuous_scale='RdYlGn',
-            title="Catch Intensity: Month × Region"
-        )
-        fig_season_heatmap.update_layout(height=600)
-        st.plotly_chart(fig_season_heatmap, use_container_width=True)
-        
-        # Insights
-        st.markdown("### 📊 Seasonal Insights")
-        peak_month = monthly_pattern.loc[monthly_pattern['total_weight'].idxmax(), 'month_name']
-        peak_weight = monthly_pattern['total_weight'].max()
-        st.info(f"🔥 **Peak Month:** {peak_month} with {peak_weight:,.0f} kg landed")
-    
-    # ========== TAB 5: DATA EXPLORER ==========
-    with tab5:
+    # ========== TAB 3: DATA EXPLORER ==========
+    with tab3:
         st.subheader("Data Explorer & Download")
         
         # Summary statistics
@@ -509,8 +337,12 @@ try:
         
         with col3:
             st.markdown("**Yearly Breakdown**")
-            yearly_counts = df_filtered['year'].value_counts().sort_index()
-            st.write(yearly_counts)
+            yearly_summary = df_filtered.groupby('year').agg(
+                count=('peso_kg', 'count'),
+                total_kg=('peso_kg', 'sum')
+            ).sort_index()
+            yearly_summary['total_kg'] = yearly_summary['total_kg'].apply(lambda x: f"{x:,.0f} kg")
+            st.write(yearly_summary)
         
         # Top catches
         st.markdown("### 🏆 Top 10 Largest Catches")
