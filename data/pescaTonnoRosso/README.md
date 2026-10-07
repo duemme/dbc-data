@@ -1,6 +1,6 @@
 # Dati Campagna Pesca Tonno rosso
 
-Campagna  di  pesca  del  tonno  rosso – anni 2021, 2022, 2023, 2024 e 2025 – contingente assegnato alla pesca sportiva/ricreativa (SPOR).
+Campagna  di  pesca  del  tonno  rosso – anni dal 2021 al 2026 – contingente assegnato alla pesca sportiva/ricreativa (SPOR).
 
 ## File
 
@@ -9,6 +9,11 @@ Campagna  di  pesca  del  tonno  rosso – anni 2021, 2022, 2023, 2024 e 2025 �
 ## Note
 
 Dati ricevuti a valle di una richiesta di accesso civico, fatta da [Matteo Mannini](https://twitter.com/ManniniMatteo).
+
+Correzioni rispetto ai dati originali (vedi `script/uniforma.py`):
+
+- `peso_kg` scritto senza zeri decimali superflui (es. `30.00` → `30`);
+- 2024: le 7 catture in BASILICATA erano assegnate alla zona FAO 37.2.1 (Adriatico), che non bagna la regione; corrette in 37.2.2 (Ionio).
 
 ## Schema
 
