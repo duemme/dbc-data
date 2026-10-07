@@ -26,11 +26,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      # la pagina legge il CSV accanto a sé
-      - run: cp data/pescaTonnoRosso/pescaTonnoRosso.csv site/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # genera le pagine con testi e numeri già scritti, sitemap, llms.txt e anteprime
+      - run: pip install matplotlib && python site/build.py _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -122,7 +122,7 @@ a { color: var(--accent-ink); }
   overflow: hidden;
 }
 
-.lang button {
+.lang a {
   font: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -130,10 +130,10 @@ a { color: var(--accent-ink); }
   border: 0;
   background: transparent;
   color: var(--text-secondary);
-  cursor: pointer;
+  text-decoration: none;
 }
 
-.lang button[aria-pressed="true"] {
+.lang a[aria-current="page"] {
   background: var(--text-primary);
   color: var(--surface-1);
 }
@@ -164,6 +164,7 @@ h1 {
 }
 
 .lede { margin: 0; color: var(--text-secondary); font-size: 17px; }
+.facts { margin: 12px 0 0; font-size: 15px; color: var(--text-secondary); }
 
 .filters {
   display: flex;
@@ -282,6 +283,7 @@ td .key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; 
   background: var(--accent);
   color: #fff;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .btn.ghost { background: transparent; color: var(--accent-ink); border-color: var(--border); margin-top: 12px; }

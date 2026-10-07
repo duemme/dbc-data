@@ -1,154 +1,21 @@
 // Dashboard tonno rosso: tutto il calcolo avviene nel browser a partire dal CSV.
 
 const CSV_URL = "pescaTonnoRosso.csv";
-const REPO_URL = "https://github.com/duemme/dbc-data";
-// Link per le donazioni (es. https://paypal.me/nomeutente). Vuoto = pulsante nascosto.
-const DONATE_URL = "https://paypal.me/MatteoMannini";
 const FIRST_YEAR = 2021;
 const ROWS_STEP = 50;
 
-const I18N = {
-  it: {
-    brand: "Tonno rosso · pesca sportiva",
-    donate: "Sostieni il progetto",
-    title: "Quanti tonni rossi pescano i pescatori sportivi in Italia",
-    lede: "Ogni cattura di tonno rosso della pesca sportiva e ricreativa, dal 2021 a oggi: data, peso, regione e zona di pesca. Dati ufficiali del Ministero (MASAF) ottenuti con richieste di accesso civico.",
-    f_years: "Anni",
-    f_region: "Regione",
-    f_fao: "Zona FAO",
-    all_regions: "Tutte le regioni",
-    all_fao: "Tutte le zone",
-    loading: "Caricamento dati…",
-    error: "Non è stato possibile caricare i dati.",
-    empty: "Nessuna cattura per i filtri scelti.",
-    t_catches: "Catture",
-    t_weight: "Peso totale",
-    t_avg: "Peso medio",
-    t_boats: "Barche",
-    t_regions: "Regioni",
-    t_catches_sub: (y) => (y === 1 ? "in 1 anno" : `in ${y} anni`),
-    t_weight_sub: "tonnellate",
-    t_avg_sub: "kg per esemplare",
-    t_boats_sub: "con almeno una cattura",
-    t_regions_sub: "con almeno una cattura",
-    season_t: "Come procede la stagione",
-    season_d: "Catture cumulate giorno per giorno, un anno per linea.",
-    years_count_t: "Catture per anno",
-    years_weight_t: "Peso totale per anno (tonnellate)",
-    years_table_t: "Riepilogo per anno",
-    regions_t: "Catture per regione",
-    hist_t: "Quanto pesano i tonni pescati",
-    hist_d: "Numero di catture per classe di peso (5 kg).",
-    heat_t: "Catture per regione e anno",
-    heat_d: "Più intenso è il colore, più sono le catture. Il trattino indica che non ci sono catture registrate.",
-    data_t: "Tutte le catture",
-    download: "Scarica CSV",
-    more: "Mostra altre",
-    c_year: "Anno",
-    c_date: "Data",
-    c_boat: "Barca",
-    c_weight: "Peso (kg)",
-    c_region: "Regione",
-    c_fao: "Zona FAO",
-    c_catches: "Catture",
-    c_total: "Peso totale (kg)",
-    c_avg: "Peso medio (kg)",
-    c_boats: "Barche",
-    u_catches: (n) => (n === 1 ? "cattura" : "catture"),
-    u_kg: "kg",
-    u_t: "t",
-    h_weight: "kg",
-    shown: (a, b) => `${a} di ${b} catture`,
-    about_t: "Note sui dati",
-    about_src: `Fonte: Ministero dell'agricoltura, della sovranità alimentare e delle foreste (MASAF), Direzione generale della pesca. Dati ottenuti con richieste di accesso civico da Matteo Mannini. Riguardano solo il contingente assegnato alla pesca sportiva e ricreativa (SPOR), non la pesca professionale.`,
-    about_ids: "Il numero della barca è un identificativo anonimo assegnato ogni anno: non permette di seguire la stessa barca da un anno all'altro.",
-    about_fix: "Correzioni rispetto ai file originali: nomi delle regioni uniformati; nel 2024 sette catture in Basilicata erano attribuite alla zona 37.2.1 (Adriatico), che non bagna la regione, e sono state riportate alla 37.2.2 (Ionio).",
-    about_repo: `Dati, file originali e codice sono su <a href="${REPO_URL}">GitHub</a>.`,
-    footer: "Progetto indipendente di data journalism. I dati sono pubblici e riutilizzabili citando la fonte.",
-    fao: {
-      "37.1.3": "37.1.3 · Ligure, Tirreno e Sardegna",
-      "37.2.1": "37.2.1 · Adriatico",
-      "37.2.2": "37.2.2 · Ionio",
-    },
-  },
-  en: {
-    brand: "Bluefin tuna · recreational fishing",
-    donate: "Support the project",
-    title: "How many bluefin tuna do recreational anglers catch in Italy",
-    lede: "Every bluefin tuna caught by sport and recreational fishers since 2021: date, weight, region and fishing area. Official data from the Italian Ministry of Agriculture (MASAF), obtained through freedom of information requests.",
-    f_years: "Years",
-    f_region: "Region",
-    f_fao: "FAO area",
-    all_regions: "All regions",
-    all_fao: "All areas",
-    loading: "Loading data…",
-    error: "The data could not be loaded.",
-    empty: "No catches for the selected filters.",
-    t_catches: "Catches",
-    t_weight: "Total weight",
-    t_avg: "Average weight",
-    t_boats: "Boats",
-    t_regions: "Regions",
-    t_catches_sub: (y) => (y === 1 ? "in 1 year" : `in ${y} years`),
-    t_weight_sub: "tonnes",
-    t_avg_sub: "kg per fish",
-    t_boats_sub: "with at least one catch",
-    t_regions_sub: "with at least one catch",
-    season_t: "How the season unfolds",
-    season_d: "Cumulative catches day by day, one line per year.",
-    years_count_t: "Catches per year",
-    years_weight_t: "Total weight per year (tonnes)",
-    years_table_t: "Summary by year",
-    regions_t: "Catches by region",
-    hist_t: "How much the fish weigh",
-    hist_d: "Number of catches per weight class (5 kg).",
-    heat_t: "Catches by region and year",
-    heat_d: "The more intense the colour, the more catches. A dash means no catches were recorded.",
-    data_t: "All catches",
-    download: "Download CSV",
-    more: "Show more",
-    c_year: "Year",
-    c_date: "Date",
-    c_boat: "Boat",
-    c_weight: "Weight (kg)",
-    c_region: "Region",
-    c_fao: "FAO area",
-    c_catches: "Catches",
-    c_total: "Total weight (kg)",
-    c_avg: "Average weight (kg)",
-    c_boats: "Boats",
-    u_catches: (n) => (n === 1 ? "catch" : "catches"),
-    u_kg: "kg",
-    u_t: "t",
-    h_weight: "kg",
-    shown: (a, b) => `${a} of ${b} catches`,
-    about_t: "About the data",
-    about_src: `Source: Italian Ministry of Agriculture, Food Sovereignty and Forests (MASAF), Directorate-General for Fisheries. Data obtained through freedom of information requests (accesso civico) by Matteo Mannini. They cover only the quota assigned to sport and recreational fishing (SPOR), not commercial fishing.`,
-    about_ids: "The boat number is an anonymous identifier assigned each year: it cannot be used to follow the same boat across years.",
-    about_fix: "Corrections to the original files: region names standardised; in 2024 seven catches in Basilicata were assigned to area 37.2.1 (Adriatic), which does not border the region, and were moved to 37.2.2 (Ionian).",
-    about_repo: `Data, original files and code are on <a href="${REPO_URL}">GitHub</a>.`,
-    footer: "Independent data journalism project. The data are public and may be reused with attribution.",
-    fao: {
-      "37.1.3": "37.1.3 · Ligurian, Tyrrhenian & Sardinia",
-      "37.2.1": "37.2.1 · Adriatic",
-      "37.2.2": "37.2.2 · Ionian",
-    },
-  },
-};
+// testi della lingua della pagina, scritti nell'HTML da build.py
+const I18N = JSON.parse(document.getElementById("i18n").textContent);
 
-const state = { lang: "it", years: new Set(), region: "", fao: "", rowsShown: ROWS_STEP };
+const state = { lang: document.documentElement.lang, years: new Set(), region: "", fao: "", rowsShown: ROWS_STEP };
 let DATA = [];
 let YEARS = [];
 
 // ---------- utilità ----------
 
-const store = {
-  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch { /* niente */ } },
-};
-
-const t = (k) => I18N[state.lang][k];
-const locale = () => (state.lang === "it" ? "it-IT" : "en-GB");
+const t = (k) => I18N[k];
+const plural = (k, n) => (n === 1 ? I18N[k].one : I18N[k].other).replace("{n}", n);
+const locale = () => I18N.locale;
 const fmt = (n, digits = 0) =>
   new Intl.NumberFormat(locale(), { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
 const fmtDay = (ms) =>
@@ -226,21 +93,6 @@ function summarizeYears(rows) {
 
 // ---------- interfaccia ----------
 
-function applyI18n() {
-  document.documentElement.lang = state.lang;
-  document.querySelectorAll("[data-i18n]").forEach((node) => {
-    const v = t(node.dataset.i18n);
-    if (typeof v !== "string") return;
-    // i testi con link sono scritti da noi, non vengono dai dati
-    if (v.includes("<a ")) node.innerHTML = v;
-    else node.textContent = v;
-  });
-  document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang)));
-  document.title = state.lang === "it" ? "Tonno rosso, pesca sportiva" : "Bluefin tuna, recreational fishing";
-  const donate = document.getElementById("donate");
-  if (DONATE_URL) { donate.href = DONATE_URL; donate.hidden = false; }
-}
-
 function buildFilters() {
   const chips = document.getElementById("f-years");
   chips.replaceChildren();
@@ -285,7 +137,7 @@ function renderTiles(rows) {
   const regions = new Set(rows.map((d) => d.region)).size;
   const years = new Set(rows.map((d) => d.year)).size;
   const items = [
-    { label: t("t_catches"), value: fmt(rows.length), sub: t("t_catches_sub")(years), hero: true },
+    { label: t("t_catches"), value: fmt(rows.length), sub: plural("t_catches_sub", years), hero: true },
     { label: t("t_weight"), value: fmt(kg / 1000, 1), sub: t("t_weight_sub") },
     { label: t("t_avg"), value: fmt(rows.length ? kg / rows.length : 0, 1), sub: t("t_avg_sub") },
     { label: t("t_boats"), value: fmt(boats), sub: t("t_boats_sub") },
@@ -337,7 +189,7 @@ function renderSeason(rows) {
   const ends = years.map((y) => points.filter((p) => p.year === y).at(-1));
 
   const tipTitle = (d) =>
-    [fmtDay(d.day), ...d.values.slice().sort((a, b) => b[1] - a[1]).map(([y, v]) => `${y}   ${fmt(v)} ${t("u_catches")(v)}`)].join("\n");
+    [fmtDay(d.day), ...d.values.slice().sort((a, b) => b[1] - a[1]).map(([y, v]) => `${y}   ${fmt(v)} ${plural("u_catches", v)}`)].join("\n");
 
   const plot = Plot.plot({
     width,
@@ -361,7 +213,7 @@ function renderSeason(rows) {
 
 function renderYearBars(summary) {
   const specs = [
-    { id: "c-years-count", value: (d) => d.n, label: (d) => fmt(d.n), tip: (d) => `${d.year}\n${fmt(d.n)} ${t("u_catches")(d.n)}` },
+    { id: "c-years-count", value: (d) => d.n, label: (d) => fmt(d.n), tip: (d) => `${d.year}\n${fmt(d.n)} ${plural("u_catches", d.n)}` },
     { id: "c-years-weight", value: (d) => d.kg / 1000, label: (d) => fmt(d.kg / 1000, 1), tip: (d) => `${d.year}\n${fmt(d.kg / 1000, 1)} ${t("u_t")}` },
   ];
   for (const s of specs) {
@@ -426,7 +278,7 @@ function renderRegions(rows) {
       Plot.barX(data, { y: "name", x: "n", fill: css("--series-1"), rx2: 4 }),
       Plot.ruleX([0], { stroke: css("--axis") }),
       Plot.text(data, { y: "name", x: "n", text: (d) => fmt(d.n), dx: 6, textAnchor: "start", fill: css("--text-secondary"), fontSize: 12 }),
-      Plot.tip(data, Plot.pointerY({ y: "name", x: "n", title: (d) => `${d.name}\n${fmt(d.n)} ${t("u_catches")(d.n)}\n${fmt(d.kg)} ${t("u_kg")}` })),
+      Plot.tip(data, Plot.pointerY({ y: "name", x: "n", title: (d) => `${d.name}\n${fmt(d.n)} ${plural("u_catches", d.n)}\n${fmt(d.kg)} ${t("u_kg")}` })),
     ],
   });
   box.replaceChildren(plot);
@@ -456,7 +308,7 @@ function renderHist(rows) {
       Plot.ruleY([0], { stroke: css("--axis") }),
       Plot.tip(rows, Plot.pointerX(Plot.binX({ y: "count", title: (v) => {
         const lo = Math.floor(v[0].kg / 5) * 5;
-        return `${fmt(lo)}–${fmt(lo + 5)} ${t("u_kg")}\n${fmt(v.length)} ${t("u_catches")(v.length)}`;
+        return `${fmt(lo)}–${fmt(lo + 5)} ${t("u_kg")}\n${fmt(v.length)} ${plural("u_catches", v.length)}`;
       } }, { x: "kg", thresholds }))),
     ],
   });
@@ -491,7 +343,7 @@ function renderHeat(rows) {
     marks: [
       Plot.cell(cells, { x: "year", y: "region", fill: (d) => (d.n ? color(d.n) : css("--surface-2")), inset: 1, rx: 4 }),
       Plot.text(cells, { x: "year", y: "region", text: (d) => (d.n ? fmt(d.n) : "–"), fill: (d) => ink(d.n), fontSize: 12 }),
-      Plot.tip(cells, Plot.pointer({ x: "year", y: "region", title: (d) => `${d.region} · ${d.year}\n${fmt(d.n)} ${t("u_catches")(d.n)}` })),
+      Plot.tip(cells, Plot.pointer({ x: "year", y: "region", title: (d) => `${d.region} · ${d.year}\n${fmt(d.n)} ${plural("u_catches", d.n)}` })),
     ],
   });
   box.replaceChildren(plot);
@@ -517,7 +369,7 @@ function renderRows(rows) {
     );
     tbody.append(tr);
   }
-  const caption = el("caption", {}, t("shown")(fmt(shown.length), fmt(rows.length)));
+  const caption = el("caption", {}, t("shown").replace("{a}", fmt(shown.length)).replace("{b}", fmt(rows.length)));
   caption.style.cssText = "caption-side: bottom; text-align: left; padding-top: 8px; font-size: 13px; color: var(--text-muted)";
   table.replaceChildren(caption, thead, tbody);
 
@@ -525,7 +377,8 @@ function renderRows(rows) {
   more.hidden = shown.length >= rows.length;
   more.onclick = () => { state.rowsShown += ROWS_STEP * 2; renderRows(filtered()); };
 
-  document.getElementById("download").onclick = () => {
+  document.getElementById("download").onclick = (e) => {
+    e.preventDefault();
     const csv = d3.csvFormat(
       sorted.map((d) => ({ identificativo_natante: d.boat, data_cattura: d.date, peso_kg: d.kg, regione: d.region, zona_FAO: d.fao })),
     );
@@ -560,23 +413,12 @@ function render() {
 }
 
 async function main() {
-  const saved = store.get("lang");
-  state.lang = saved === "it" || saved === "en" ? saved : navigator.language?.startsWith("it") ? "it" : "en";
-  applyI18n();
-
-  document.querySelectorAll(".lang button").forEach((b) =>
-    b.addEventListener("click", () => {
-      state.lang = b.dataset.lang;
-      store.set("lang", state.lang);
-      applyI18n();
-      if (DATA.length) { buildFilters(); render(); }
-    }),
-  );
-
   try {
     await load();
   } catch (e) {
-    document.getElementById("status").textContent = t("error");
+    const status = document.getElementById("status");
+    status.textContent = t("error");
+    status.hidden = false;
     console.error(e);
     return;
   }

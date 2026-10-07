@@ -2,7 +2,9 @@
 
 Dati ufficiali sulle catture di tonno rosso della pesca sportiva e ricreativa in Italia (contingente SPOR), dal 2021, ottenuti dal MASAF con richieste di accesso civico.
 
-**Dashboard:** https://duemme.github.io/dbc-data/
+**Dashboard:** https://duemme.github.io/dbc-data/ (italiano) · https://duemme.github.io/dbc-data/en/ (English)
+
+**Licenza:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.it), citando «Matteo Mannini, dati MASAF ottenuti con accesso civico».
 
 ## Dataset
 
@@ -10,11 +12,14 @@ Dati ufficiali sulle catture di tonno rosso della pesca sportiva e ricreativa in
 
 ## Dashboard
 
-La dashboard è una pagina statica in [`site/`](site/), pubblicata su GitHub Pages da [`.github/workflows/pages.yml`](.github/workflows/pages.yml) a ogni push su `main` che modifica la pagina o `pescaTonnoRosso.csv`. Tutti i calcoli avvengono nel browser.
+La dashboard è statica e viene pubblicata su GitHub Pages da [`.github/workflows/pages.yml`](.github/workflows/pages.yml) a ogni push su `main` che modifica `site/` o `pescaTonnoRosso.csv`.
+
+[`site/build.py`](site/build.py) genera una pagina per lingua a partire da `template.html` e `i18n.json`, con testi, numeri principali e metadati (schema.org Dataset, Open Graph, hreflang) già scritti nell'HTML, più `sitemap.xml`, `llms.txt` e le immagini di anteprima. I grafici e i filtri sono calcolati nel browser da `app.js`.
 
 Per provarla in locale:
 
 ```sh
-cp data/pescaTonnoRosso/pescaTonnoRosso.csv site/
-python3 -m http.server -d site 8000
+pip install matplotlib
+python3 site/build.py _site
+python3 -m http.server -d _site 8000
 ```

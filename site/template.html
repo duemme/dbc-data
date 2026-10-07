@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {{base}}
+  <title>{{page_title}}</title>
+  <meta name="description" content="{{meta_description}}">
+  <meta name="author" content="Matteo Mannini">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#2a78d6">
+  <link rel="canonical" href="{{url}}">
+  <link rel="alternate" hreflang="it" href="{{url_it}}">
+  <link rel="alternate" hreflang="en" href="{{url_en}}">
+  <link rel="alternate" hreflang="x-default" href="{{url_en}}">
+  <link rel="alternate" type="text/markdown" href="llms.txt" title="llms.txt">
+  <link rel="alternate" type="text/csv" href="pescaTonnoRosso.csv" title="CSV">
+  <link rel="sitemap" type="application/xml" href="sitemap.xml">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{brand}}">
+  <meta property="og:title" content="{{og_title}}">
+  <meta property="og:description" content="{{meta_description}}">
+  <meta property="og:url" content="{{url}}">
+  <meta property="og:locale" content="{{og_locale}}">
+  <meta property="og:locale:alternate" content="{{og_locale_alt}}">
+  <meta property="og:image" content="{{og_image}}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{years_count_t}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{og_title}}">
+  <meta name="twitter:description" content="{{meta_description}}">
+  <meta name="twitter:image" content="{{og_image}}">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json">{{jsonld}}</script>
+  <script type="application/json" id="i18n">{{i18n}}</script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.17/dist/plot.umd.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="viz-root">
+    <header class="top">
+      <div class="top-inner">
+        <span class="brand">{{brand}}</span>
+        <div class="top-actions">
+          <nav class="lang" aria-label="Lingua / Language">
+            <a href="./" hreflang="it" lang="it" {{cur_it}}>IT</a>
+            <a href="en/" hreflang="en" lang="en" {{cur_en}}>EN</a>
+          </nav>
+          <a class="donate" id="donate" href="{{donate_url}}" target="_blank" rel="noopener">
+            <span aria-hidden="true">♥</span> <span>{{donate}}</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <h1>{{title}}</h1>
+        <p class="lede">{{lede}}</p>
+        <p class="facts">{{facts}}</p>
+      </section>
+
+      <section class="filters" aria-label="{{f_years}} / {{f_region}} / {{f_fao}}">
+        <div class="filter">
+          <span class="filter-label">{{f_years}}</span>
+          <div class="chips" id="f-years"></div>
+        </div>
+        <label class="filter">
+          <span class="filter-label">{{f_region}}</span>
+          <select id="f-region"></select>
+        </label>
+        <label class="filter">
+          <span class="filter-label">{{f_fao}}</span>
+          <select id="f-fao"></select>
+        </label>
+      </section>
+
+      <p class="status" id="status" hidden></p>
+
+      <div id="content">
+        <section class="tiles" id="tiles">{{tiles}}</section>
+
+        <section class="card">
+          <h2>{{season_t}}</h2>
+          <p class="note">{{season_d}}</p>
+          <div class="legend" id="season-legend"></div>
+          <div class="chart" id="c-season"><p class="note">{{loading}}</p></div>
+        </section>
+
+        <div class="grid2">
+          <section class="card">
+            <h2>{{years_count_t}}</h2>
+            <div class="chart" id="c-years-count"></div>
+          </section>
+          <section class="card">
+            <h2>{{years_weight_t}}</h2>
+            <div class="chart" id="c-years-weight"></div>
+          </section>
+        </div>
+
+        <section class="card">
+          <h2>{{years_table_t}}</h2>
+          <div class="table-wrap"><table id="t-years">{{years_table}}</table></div>
+        </section>
+
+        <div class="grid2">
+          <section class="card">
+            <h2>{{regions_t}}</h2>
+            <div class="chart" id="c-regions"></div>
+          </section>
+          <section class="card">
+            <h2>{{hist_t}}</h2>
+            <p class="note">{{hist_d}}</p>
+            <div class="chart" id="c-hist"></div>
+          </section>
+        </div>
+
+        <section class="card">
+          <h2>{{heat_t}}</h2>
+          <p class="note">{{heat_d}}</p>
+          <div class="chart" id="c-heat"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>{{data_t}}</h2>
+            <a class="btn" id="download" href="pescaTonnoRosso.csv" download>{{download}}</a>
+          </div>
+          <div class="table-wrap"><table id="t-rows"></table></div>
+          <button type="button" class="btn ghost" id="more" hidden>{{more}}</button>
+        </section>
+
+        <section class="about">
+          <h2>{{about_t}}</h2>
+          <ul>
+            <li>{{about_src}}</li>
+            <li>{{about_ids}}</li>
+            <li>{{about_fix}}</li>
+            <li>{{about_repo}}</li>
+            <li>{{about_license}}</li>
+          </ul>
+        </section>
+      </div>
+    </main>
+
+    <footer class="foot">
+      <p>{{footer}} <a href="llms.txt">llms.txt</a></p>
+    </footer>
+  </div>
+</body>
+</html>

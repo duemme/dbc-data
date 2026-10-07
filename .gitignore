@@ -2,5 +2,5 @@ tmp*
 .~lock*
 *Zone.Identifier
 .DS_Store
-site/pescaTonnoRosso.csv
+_site/
 __pycache__/

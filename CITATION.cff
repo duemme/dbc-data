@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "Se usi questi dati, citali così / If you use these data, please cite them as below."
+type: dataset
+title: "Catture di tonno rosso della pesca sportiva e ricreativa in Italia / Bluefin tuna catches by recreational fishing in Italy"
+authors:
+  - family-names: Mannini
+    given-names: Matteo
+license: CC-BY-4.0
+url: "https://duemme.github.io/dbc-data/"
+repository-code: "https://github.com/duemme/dbc-data"
+keywords:
+  - bluefin tuna
+  - Thunnus thynnus
+  - recreational fishing
+  - Italy
+  - open data
