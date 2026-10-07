@@ -177,7 +177,7 @@ def jsonld(t, lang):
             {"@type": "PropertyValue", "name": "regione", "description": "Italian region of landing"},
             {"@type": "PropertyValue", "name": "zona_FAO", "description": "FAO major fishing area 37 division: 37.1.3, 37.2.1 or 37.2.2"},
         ],
-        "measurementTechnique": "Official catch declarations of the Italian recreational bluefin tuna quota (SPOR), obtained through freedom of information requests",
+        "measurementTechnique": "Catch declarations recorded by the competent Italian authorities for the recreational bluefin tuna quota (SPOR), obtained through freedom of information requests",
         "distribution": [
             {"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": CSV_URL},
         ],
@@ -286,7 +286,7 @@ One row per fish caught.
 
 ## Caveats
 
-- Only the Italian sport and recreational quota (SPOR); commercial fishing is not included.
+- Only catches declared and recorded by the competent Italian authorities under the sport and recreational quota (SPOR); undeclared catches and commercial fishing are not included.
 - {t['about_fix']}
 - Raw files are published as received from the ministry in `data/pescaTonnoRosso/grezzi/` of the repository.
 """

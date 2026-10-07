@@ -1,6 +1,6 @@
 # Tonno rosso, pesca sportiva in Italia
 
-Dati ufficiali sulle catture di tonno rosso della pesca sportiva e ricreativa in Italia (contingente SPOR), dal 2021, ottenuti dal MASAF con richieste di accesso civico.
+Dati ufficiali sulle catture di tonno rosso della pesca sportiva e ricreativa in Italia (contingente SPOR) dichiarate e registrate dalle autorità italiane competenti, dal 2021, ottenuti dal MASAF con richieste di accesso civico.
 
 **Dashboard:** https://duemme.github.io/dbc-data/ (italiano) · https://duemme.github.io/dbc-data/en/ (English)
 

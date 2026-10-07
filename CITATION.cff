@@ -1,7 +1,8 @@
 cff-version: 1.2.0
 message: "Se usi questi dati, citali così / If you use these data, please cite them as below."
 type: dataset
-title: "Catture di tonno rosso della pesca sportiva e ricreativa in Italia / Bluefin tuna catches by recreational fishing in Italy"
+title: "Catture di tonno rosso dichiarate e registrate della pesca sportiva e ricreativa in Italia / Declared and recorded bluefin tuna catches by recreational fishing in Italy"
+abstract: "Every bluefin tuna (Thunnus thynnus) catch by sport and recreational fishers in Italy since 2021, as declared and recorded by the competent Italian authorities. Official MASAF data obtained through freedom of information requests."
 authors:
   - family-names: Mannini
     given-names: Matteo
