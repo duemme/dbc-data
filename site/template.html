@@ -40,6 +40,8 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.17/dist/plot.umd.min.js" defer></script>
   <script src="app.js" defer></script>
+  <!-- statistiche anonime, senza cookie: https://tonnorosso.goatcounter.com -->
+  <script data-goatcounter="https://tonnorosso.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
   <div class="viz-root">
@@ -48,10 +50,10 @@
         <span class="brand">{{brand}}</span>
         <div class="top-actions">
           <nav class="lang" aria-label="Lingua / Language">
-            <a href="./" hreflang="it" lang="it" {{cur_it}}>IT</a>
-            <a href="en/" hreflang="en" lang="en" {{cur_en}}>EN</a>
+            <a href="./" hreflang="it" lang="it" {{cur_it}} data-goatcounter-click="lingua-it">IT</a>
+            <a href="en/" hreflang="en" lang="en" {{cur_en}} data-goatcounter-click="lingua-en">EN</a>
           </nav>
-          <a class="donate" id="donate" href="{{donate_url}}" target="_blank" rel="noopener">
+          <a class="donate" id="donate" href="{{donate_url}}" target="_blank" rel="noopener" data-goatcounter-click="donazione-{{lang}}">
             <span aria-hidden="true">♥</span> <span>{{donate}}</span>
           </a>
         </div>
@@ -130,7 +132,7 @@
         <section class="card">
           <div class="card-head">
             <h2>{{data_t}}</h2>
-            <a class="btn" id="download" href="pescaTonnoRosso.csv" download>{{download}}</a>
+            <a class="btn" id="download" href="pescaTonnoRosso.csv" download data-goatcounter-click="download-csv-{{lang}}">{{download}}</a>
           </div>
           <div class="table-wrap"><table id="t-rows"></table></div>
           <button type="button" class="btn ghost" id="more" hidden>{{more}}</button>
@@ -144,6 +146,7 @@
             <li>{{about_fix}}</li>
             <li>{{about_repo}}</li>
             <li>{{about_license}}</li>
+            <li>{{about_privacy}}</li>
           </ul>
         </section>
       </div>
