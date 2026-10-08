@@ -347,6 +347,12 @@ function renderHeat(rows) {
     ],
   });
   box.replaceChildren(plot);
+
+  // scala dei colori: in tema scuro va dal più scuro al più chiaro, quindi va sempre mostrata
+  const legend = document.getElementById("heat-legend");
+  const bar = el("span", { class: "scale-bar" });
+  bar.style.background = `linear-gradient(to right, ${d3.range(0, 1.01, 0.25).map((k) => color(1 + k * (maxN - 1))).join(", ")})`;
+  legend.replaceChildren(el("span", {}, fmt(1)), bar, el("span", {}, `${fmt(maxN)} ${plural("u_catches", maxN)}`));
 }
 
 function renderRows(rows) {
