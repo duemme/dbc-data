@@ -50,10 +50,10 @@
         <span class="brand">{{brand}}</span>
         <div class="top-actions">
           <nav class="lang" aria-label="Lingua / Language">
-            <a href="./" hreflang="it" lang="it" {{cur_it}} data-goatcounter-click="lingua-it">IT</a>
-            <a href="en/" hreflang="en" lang="en" {{cur_en}} data-goatcounter-click="lingua-en">EN</a>
+            <a href="./" hreflang="it" lang="it" {{cur_it}} data-goatcounter-click="lingua-it" data-goatcounter-title="Cambio lingua: italiano">IT</a>
+            <a href="en/" hreflang="en" lang="en" {{cur_en}} data-goatcounter-click="lingua-en" data-goatcounter-title="Cambio lingua: inglese">EN</a>
           </nav>
-          <a class="donate" id="donate" href="{{donate_url}}" target="_blank" rel="noopener" data-goatcounter-click="donazione-{{lang}}">
+          <a class="donate" id="donate" href="{{donate_url}}" target="_blank" rel="noopener" data-goatcounter-click="donazione-{{lang}}" data-goatcounter-title="Clic su Sostieni il progetto ({{lang}})">
             <span aria-hidden="true">♥</span> <span>{{donate}}</span>
           </a>
         </div>
@@ -132,7 +132,7 @@
         <section class="card">
           <div class="card-head">
             <h2>{{data_t}}</h2>
-            <a class="btn" id="download" href="pescaTonnoRosso.csv" download data-goatcounter-click="download-csv-{{lang}}">{{download}}</a>
+            <a class="btn" id="download" href="pescaTonnoRosso.csv" download data-goatcounter-click="download-csv-{{lang}}" data-goatcounter-title="Download CSV ({{lang}})">{{download}}</a>
           </div>
           <div class="table-wrap"><table id="t-rows"></table></div>
           <button type="button" class="btn ghost" id="more" hidden>{{more}}</button>
